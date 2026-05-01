@@ -1,0 +1,601 @@
+# OpenWrt MCP Server — Tool Manifest
+# 37 tools across 7 operational domains.
+# This file declares tool shapes for catalog / discovery clients.
+tools:
+  # ── DHCP (6) ─────────────────────────────────────────────────────────────
+  - name: openwrt.dhcp_get_leases
+    description: Read the current DHCP lease table from /tmp/dhcp.leases.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.dhcp_get_static_assignments
+    description: Read static DHCP host reservations from UCI.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.dhcp_get_dns_settings
+    description: Read dnsmasq DNS and DHCP configuration from UCI.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.dhcp_add_static_lease
+    description: Add a static DHCP reservation via UCI.
+    input_schema:
+      type: object
+      required: [site_id, node_id, mac, ip, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        mac: {type: string, description: "MAC address (e.g. aa:bb:cc:dd:ee:ff)"}
+        ip: {type: string, description: "Reserved IP address"}
+        hostname: {type: string, nullable: true}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  - name: openwrt.dhcp_remove_static_lease
+    description: Remove a static DHCP reservation by MAC address.
+    input_schema:
+      type: object
+      required: [site_id, node_id, mac, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        mac: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  - name: openwrt.dhcp_renew_lease
+    description: Force a DHCP renew on a network interface.
+    input_schema:
+      type: object
+      required: [site_id, node_id, iface, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        iface: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  # ── Firewall (5) ──────────────────────────────────────────────────────────
+  - name: openwrt.firewall_get_rules
+    description: Read active firewall rules from UCI.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.firewall_get_zones
+    description: Read firewall zone definitions from UCI.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.firewall_add_rule
+    description: Add a firewall rule via UCI.
+    input_schema:
+      type: object
+      required: [site_id, node_id, src, dest, target, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        src: {type: string}
+        dest: {type: string}
+        target: {type: string, enum: [ACCEPT, DROP, REJECT]}
+        proto: {type: string, default: all}
+        src_port: {type: string, nullable: true}
+        dest_port: {type: string, nullable: true}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  - name: openwrt.firewall_remove_rule
+    description: Remove a firewall rule by matching src/dest/target.
+    input_schema:
+      type: object
+      required: [site_id, node_id, src, dest, target, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        src: {type: string}
+        dest: {type: string}
+        target: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  - name: openwrt.firewall_reload
+    description: Reload the firewall configuration.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  # ── Network (9) ────────────────────────────────────────────────────────────
+  - name: openwrt.check_wan
+    description: Probe the WAN interface via `ifstatus wan`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.check_gateway
+    description: Probe LAN interface + upstream gateway reachability.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.restart_wan
+    description: Bounce the WAN interface via `ifdown wan && ifup wan`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.network_get_interfaces
+    description: Dump all network interface states via `ubus call network.interface dump`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.network_get_routes
+    description: Read the routing table via `ip -j route`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.network_get_arp_table
+    description: Read the ARP/neighbour table via `ip -4 neigh show`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.network_set_interface_ip
+    description: Set a static IP on an interface via `uci set` + `uci commit`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, iface, ip, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        iface: {type: string}
+        ip: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  - name: openwrt.network_restart_interface
+    description: Bounce a network interface via `ifdown <iface> && ifup <iface>`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, iface, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        iface: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  - name: openwrt.network_get_dns_resolvers
+    description: Read DNS resolver configuration from /tmp/resolv.conf.d/resolv.conf.auto.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  # ── System (5) ────────────────────────────────────────────────────────────
+  - name: openwrt.reboot_router
+    description: Reboot the OpenWrt router (fire-and-forget).
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: true
+
+  - name: openwrt.system_get_uptime
+    description: Read system uptime from /proc/uptime.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.system_get_load
+    description: Read system load averages from /proc/loadavg.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.system_get_memory
+    description: Read system memory info from /proc/meminfo.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.system_get_processes
+    description: Count running processes via `ps | tail -n +2 | wc -l`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  # ── opkg (3) ──────────────────────────────────────────────────────────────
+  - name: openwrt.opkg_list
+    description: List all available and installed opkg packages.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.opkg_install
+    description: Install an opkg package.
+    input_schema:
+      type: object
+      required: [site_id, package, auth]
+      properties:
+        site_id: {type: string}
+        package: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: true
+
+  - name: openwrt.opkg_remove
+    description: Remove an installed opkg package.
+    input_schema:
+      type: object
+      required: [site_id, package, auth]
+      properties:
+        site_id: {type: string}
+        package: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: true
+
+  # ── Service (1) ──────────────────────────────────────────────────────────
+  - name: openwrt.service_action
+    description: Invoke an init script action on an OpenWrt service (enable/disable/start/stop/restart/status/reload).
+    input_schema:
+      type: object
+      required: [site_id, node_id, service, action, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        service: {type: string}
+        action: {type: string, enum: [enable, disable, start, stop, restart, status, reload]}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: true
+
+  # ── UCI (2) ───────────────────────────────────────────────────────────────
+  - name: openwrt.uci_show
+    description: Dump the full UCI configuration tree for a config section via `uci -j show <config>`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, config, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        config: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.uci_get
+    description: Read a single UCI value by dot-separated path (e.g. network.lan.ipaddr).
+    input_schema:
+      type: object
+      required: [site_id, node_id, path, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        path: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  # ── Wireless (6) ──────────────────────────────────────────────────────────
+  - name: openwrt.check_wifi
+    description: Run `iwinfo` to get WiFi device info and scan results.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.wireless_get_clients
+    description: List WiFi clients associated to a radio interface via `iwinfo <iface> assoclist -J`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, iface, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        iface: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.wireless_get_signal_strength
+    description: Read per-client signal strength (dBm) for a WiFi interface.
+    input_schema:
+      type: object
+      required: [site_id, node_id, iface, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        iface: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+      openWorldHint: true
+
+  - name: openwrt.wireless_set_ssid
+    description: Set the SSID of a WiFi radio interface via `uci set` + `uci commit`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, radio, ssid, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        radio: {type: string}
+        ssid: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  - name: openwrt.wireless_restart_radio
+    description: Restart the WiFi radio via `/etc/init.d/network restart`.
+    input_schema:
+      type: object
+      required: [site_id, node_id, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+  - name: openwrt.wireless_set_password
+    description: Set the WiFi passphrase (pre-shared key) for a radio interface.
+    input_schema:
+      type: object
+      required: [site_id, node_id, radio, password, auth]
+      properties:
+        site_id: {type: string}
+        node_id: {type: string}
+        radio: {type: string}
+        password: {type: string}
+        auth: {$ref: "#/definitions/AuthCredential"}
+    annotations:
+      readOnlyHint: false
+      destructiveHint: true
+      idempotentHint: false
+      openWorldHint: false
+
+definitions:
+  AuthCredential:
+    type: object
+    required: [username, password]
+    properties:
+      username: {type: string}
+      password: {type: string}
