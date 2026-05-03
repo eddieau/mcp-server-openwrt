@@ -42,6 +42,17 @@ result = await session.call_tool(
 Transport mode is `streamable-http` when running inside a host's
 container compose.
 
+### `site_id` parameter
+
+Every tool accepts a `site_id: str` argument as part of its
+signature. This MCP server itself does NOT use `site_id` — only
+`node_id` + `auth` are read by the SSH client. `site_id` is
+**reserved for future per-site authorisation routing** in
+embedding host projects (e.g. an MSP gateway that fans tool calls
+across many customer sites). Today, callers may pass any string.
+Do NOT assume `site_id` is being checked or enforced inside this
+server.
+
 ## Transport Modes
 
 | Mode | Env vars needed | Use case |
